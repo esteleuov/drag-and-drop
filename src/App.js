@@ -133,9 +133,9 @@ function App() {
           position: "sticky",
           zIndex: "2",
           bottom: "22vh",
-          width: "100%",
           display: "flex",
           justifyContent: "end",
+          width: "18rem"
         }}
       >
         <Card
