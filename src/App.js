@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from "react";
 function App() {
   const [cart, setCart] = useState([]);
   const [item, setItem] = useState();
+  const [costs, setCosts] = useState(0)
   const items = useRef([]);
 
   const products = [
@@ -83,13 +84,31 @@ function App() {
 
   const dragItemEnd = (e) => {
     setItem("");
-    console.log(item);
   };
 
   const addCart = (e) => {
     items.current.push(item);
-    console.log(items);
+    console.log(items.current);
+    let sum = 0
+    items.current.map((el) => {
+      sum += Number(el.price)
+      return sum
+    })
+    setCosts(sum)
   };
+
+  const deleteItem = (id) => {
+    const x = items.current.find((el) => {
+      return el.id === id
+    })
+    console.log(x.id);
+    const searchIndex = items.current.findIndex((el) => {
+      return el.id === x.id
+    })
+    console.log(searchIndex);
+    // items.current = items.current.splice(searchIndex, 1)
+    console.log(items.current);
+  }
 
   return (
     <div className="App">
@@ -142,7 +161,6 @@ function App() {
           style={{ width: "18rem" }}
           onDragOver={(e) => {
             e.preventDefault();
-            console.log("onDragOver");
           }}
           onDrop={() => addCart()}
         >
@@ -165,7 +183,7 @@ function App() {
                 >
                   {item.title}{" "}
                   <p style={{ margin: 0, fontWeight: 600 }}>{item.price} тг.</p>{" "}
-                  <Button variant="danger">Удалить</Button>{" "}
+                  <Button onClick={() => {deleteItem(item.id)}} variant="danger">Удалить</Button>{" "}
                 </ListGroup.Item>
               ))
 
@@ -179,7 +197,7 @@ function App() {
                 width: "100%",
               }}
             >
-              {"Сумма "}
+              {"Сумма: "} {costs}
               <Button variant="primary">Перейти к оплате</Button>{" "}
             </ListGroup.Item>
           </ListGroup>
