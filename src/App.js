@@ -13,7 +13,6 @@ function App() {
   const [cart, setCart] = useState([]);
   const [item, setItem] = useState();
   const [costs, setCosts] = useState(0)
-  const items = useRef([]);
 
   const products = [
     {
@@ -87,27 +86,18 @@ function App() {
   };
 
   const addCart = (e) => {
-    items.current.push(item);
-    console.log(items.current);
     let sum = 0
-    items.current.map((el) => {
-      sum += Number(el.price)
-      return sum
-    })
-    setCosts(sum)
+    setCart([...cart, item])
   };
+  console.log(cart);
 
   const deleteItem = (id) => {
-    const x = items.current.find((el) => {
+    const x = cart.find((el) => {
       return el.id === id
     })
-    console.log(x.id);
-    const searchIndex = items.current.findIndex((el) => {
-      return el.id === x.id
-    })
-    console.log(searchIndex);
-    // items.current = items.current.splice(searchIndex, 1)
-    console.log(items.current);
+    const resItems = cart.filter(item => item.id !== x.id)
+    console.log(resItems);
+    setCart(resItems)
   }
 
   return (
@@ -154,7 +144,8 @@ function App() {
           bottom: "22vh",
           display: "flex",
           justifyContent: "end",
-          width: "18rem"
+          width: "18rem",
+          left: '100vw'
         }}
       >
         <Card
@@ -168,10 +159,10 @@ function App() {
             Корзина
           </Card.Header>
           <ListGroup variant="flush">
-            {items.current.length === 0 ? (
+            {cart.length === 0 ? (
               <ListGroup.Item>Корзина пуст</ListGroup.Item>
             ) : (
-              items.current.map((item) => (
+              cart.map((item) => (
                 <ListGroup.Item
                   key={item.id}
                   style={{
