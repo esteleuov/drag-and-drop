@@ -5,73 +5,26 @@ import {
   Row,
   Card,
   ListGroup,
+  Alert,
 } from "react-bootstrap";
 import "./App.css";
 import { useEffect, useRef, useState } from "react";
+import { products } from "./store/data";
 
 function App() {
   const [cart, setCart] = useState([]);
   const [item, setItem] = useState();
-  const [costs, setCosts] = useState(0)
+  const [costs, setCosts] = useState(0);
 
-  const products = [
-    {
-      id: 1,
-      img: "https://loremflickr.com/620/420",
-      title: "Товар 1",
-      price: 7800,
-      desc: "Описание соответствует товару 1, качество лучшее, изготовитель: Испания, Мадрид, Лорен 1 ООО Барнабео",
-    },
-    {
-      id: 2,
-      img: "https://loremflickr.com/620/420",
-      title: "Товар 2",
-      price: 1900,
-      desc: "Пытаюсь привязать дата атрибуты к кастомному компоненту, нее пробрасывая их внутрь этого компонента",
-    },
-    {
-      id: 3,
-      img: "https://loremflickr.com/620/420",
-      title: "Товар 3",
-      price: 2320,
-      desc: "Описание соответствует товару 1, качество лучшее, изготовитель: Испания, Мадрид, Лорен 1 ООО Барнабе",
-    },
-    {
-      id: 4,
-      img: "https://loremflickr.com/620/420",
-      title: "Товар 4",
-      price: 6400,
-      desc: "Описание соответствует товару 1, качество лучшее, изготовитель: Испания, Мадрид, Лорен 1 ООО Барнабео",
-    },
-    {
-      id: 5,
-      img: "https://loremflickr.com/620/420",
-      title: "Товар 5",
-      price: 5000,
-      desc: "Описание соответствует товару 1, качество лучшее, изготовитель: Испания, Мадрид, Лорен 1 ООО Барнабео",
-    },
-    {
-      id: 6,
-      img: "https://loremflickr.com/620/420",
-      title: "Товар 6",
-      price: 3620,
-      desc: "Описание соответствует товару 1, качество лучшее, изготовитель: Испания, Мадрид, Лорен 1 ООО Барнабео",
-    },
-    {
-      id: 7,
-      img: "https://loremflickr.com/620/420",
-      title: "Товар 7",
-      price: 3100,
-      desc: "Описание соответствует товару 1, качество лучшее, изготовитель: Испания, Мадрид, Лорен 1 ООО Барнабео",
-    },
-    {
-      id: 8,
-      img: "https://loremflickr.com/620/420",
-      title: "Товар 8",
-      price: 1400,
-      desc: "Описание соответствует товару 1, качество лучшее, изготовитель: Испания, Мадрид, Лорен 1 ООО Барнабео",
-    },
-  ];
+  let styleDragCart = {
+    width: "18rem",
+  };
+
+  // Сумма всех товаров
+  let sum = 0;
+  let price = cart.map((el) => {
+    sum += Number(el.price);
+  });
 
   const dragItem = (e) => {
     setItem({
@@ -85,20 +38,26 @@ function App() {
     setItem("");
   };
 
+  // Добавление товара и запрет повторений
   const addCart = (e) => {
-    let sum = 0
-    setCart([...cart, item])
+    const existItem = cart.find((el) => el.id === item.id);
+    if (existItem !== undefined) {
+      console.log("Существует");
+    } else {
+      setCart([...cart, item]);
+    }
   };
-  console.log(cart);
 
+  
+
+  // Удаление товара
   const deleteItem = (id) => {
     const x = cart.find((el) => {
-      return el.id === id
-    })
-    const resItems = cart.filter(item => item.id !== x.id)
-    console.log(resItems);
-    setCart(resItems)
-  }
+      return el.id === id;
+    });
+    const resItems = cart.filter((item) => item.id !== x.id);
+    setCart(resItems);
+  };
 
   return (
     <div className="App">
@@ -143,16 +102,40 @@ function App() {
           zIndex: "2",
           bottom: "22vh",
           display: "flex",
+          flexDirection: "column",
           justifyContent: "end",
           width: "18rem",
-          left: '100vw'
+          left: "100vw",
         }}
       >
+        <Alert
+          style={{
+            fontSize: "14px",
+            fontWeight: 600,
+            margin: 0,
+          }}
+          variant="success"
+        >
+          Товар успешно добавлен в корзину!
+        </Alert>
+        <Alert
+          style={{
+            fontSize: "14px",
+            fontWeight: 600,
+            margin: 0,
+          }}
+          variant="danger"
+        >
+          Данный товар присутствует!
+        </Alert>
         <Card
-          style={{ width: "18rem" }}
           onDragOver={(e) => {
             e.preventDefault();
+            styleDragCart = {
+              border: "1px solid red",
+            };
           }}
+          style={styleDragCart}
           onDrop={() => addCart()}
         >
           <Card.Header style={{ backgroundColor: "#fdc10d", fontWeight: 700 }}>
@@ -174,10 +157,16 @@ function App() {
                 >
                   {item.title}{" "}
                   <p style={{ margin: 0, fontWeight: 600 }}>{item.price} тг.</p>{" "}
-                  <Button onClick={() => {deleteItem(item.id)}} variant="danger">Удалить</Button>{" "}
+                  <Button
+                    onClick={() => {
+                      deleteItem(item.id);
+                    }}
+                    variant="danger"
+                  >
+                    Удалить
+                  </Button>{" "}
                 </ListGroup.Item>
               ))
-
             )}
             <ListGroup.Item
               style={{
@@ -188,7 +177,7 @@ function App() {
                 width: "100%",
               }}
             >
-              {"Сумма: "} {costs}
+              {"Сумма: "} {sum}
               <Button variant="primary">Перейти к оплате</Button>{" "}
             </ListGroup.Item>
           </ListGroup>
