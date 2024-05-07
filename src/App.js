@@ -14,13 +14,12 @@ import { products } from "./store/data";
 function App() {
   const [cart, setCart] = useState([]);
   const [item, setItem] = useState();
+  const [visibleAlertGreen, setvisibleAlertGreen] = useState("none");
+  const [visibleAlertRed, setvisibleAlertRed] = useState("none");
+  const [visibleAlertOr, setvisibleAlertOr] = useState("none");
+  const [grab, setGrab] = useState('grab')
+  const [borderCart, setBorderCart] = useState('none')
   const sum = useRef(0);
-  const styleAlertAdd = useRef({
-    fontSize: "14px",
-    fontWeight: 600,
-    margin: 0,
-    display: "none",
-  });
 
   let styleDragCart = {
     width: "18rem",
@@ -33,42 +32,56 @@ function App() {
       title: e.target.dataset.title,
       price: e.target.dataset.price,
     });
+    setGrab('grabbing')
   };
 
   const dragItemEnd = (e) => {
+    setGrab('grab')
     setItem("");
   };
 
-  // Добавление товара и запрет повторений
+  // // Добавление товара с помощью перетаскиваний
   const addCartwithDrag = (e) => {
     const existItem = cart.find((el) => el.id === item.id);
     if (existItem !== undefined) {
-      console.log("Существует");
+      setvisibleAlertOr('block')
+      setTimeout(() => {
+        setvisibleAlertOr('none')
+      }, 2000)
     } else {
       setCart([...cart, item]);
       sum.current = sum.current + Number(item.price);
+      setvisibleAlertGreen("block");
+      setTimeout(() => {
+        setvisibleAlertGreen("none");
+      }, 2000);
     }
+    setBorderCart('none')
   };
-
+  
+  // Добавление товара с помощью кнопкой
   const addCart = (e) => {
     const existItem = cart.find((el) => el.id === e.target.dataset.id);
     if (existItem !== undefined) {
-      console.log("Существует");
+      setvisibleAlertOr('block')
+      setTimeout(() => {
+        setvisibleAlertOr('none')
+      }, 2000)
     } else {
-      setCart([...cart, {
-        id: e.target.dataset.id,
-        title: e.target.dataset.title,
-        price: e.target.dataset.price
-      }])
+      setCart([
+        ...cart,
+        {
+          id: e.target.dataset.id,
+          title: e.target.dataset.title,
+          price: e.target.dataset.price,
+        },
+      ]);
       sum.current = sum.current + Number(e.target.dataset.price);
+      setvisibleAlertGreen("block");
+      setTimeout(() => {
+        setvisibleAlertGreen("none");
+      }, 2000);
     }
-  };
-
-  const styleAlertDelete = {
-    fontSize: "14px",
-    fontWeight: 600,
-    margin: 0,
-    display: "none",
   };
 
   // Удаление товара
@@ -79,6 +92,10 @@ function App() {
     const resItems = cart.filter((item) => item.id !== x.id);
     setCart(resItems);
     sum.current = Number(sum.current) - x.price;
+    setvisibleAlertRed("block");
+    setTimeout(() => {
+      setvisibleAlertRed("none");
+    }, 2000);
   };
 
   return (
@@ -102,7 +119,7 @@ function App() {
                     width: "290px",
                     margin: "8px",
                     padding: "0px",
-                    border: "2px solid red",
+                    cursor: grab
                   }}
                   draggable={true}
                   onDragStart={(e) => dragItem(e)}
@@ -144,20 +161,51 @@ function App() {
           left: "100vw",
         }}
       >
-        <Alert style={styleAlertAdd.current} variant="success">
+        <Alert
+          style={{
+            fontSize: "14px",
+            fontWeight: 600,
+            margin: 0,
+            display: visibleAlertGreen,
+          }}
+          variant="success"
+        >
           Товар успешно добавлен в корзину!
         </Alert>
-        <Alert style={styleAlertDelete} variant="danger">
-          Данный товар присутствует!
+        <Alert
+          style={{
+            fontSize: "14px",
+            fontWeight: 600,
+            margin: 0,
+            display: visibleAlertRed,
+          }}
+          variant="danger"
+        >
+          Товар успешно удален!
+        </Alert>
+        <Alert
+          style={{
+            fontSize: "14px",
+            fontWeight: 600,
+            margin: 0,
+            display: visibleAlertOr,
+          }}
+          variant="warning"
+        >
+          Данный товар присутствует в корзине!
         </Alert>
         <Card
           onDragOver={(e) => {
             e.preventDefault();
-            styleDragCart = {
-              border: "1px solid red",
-            };
+            setBorderCart('3px solid blue')
           }}
-          style={styleDragCart}
+          style={{
+            width: '18rem',
+            border: borderCart
+          }}
+          onDragLeave={() => {
+            setBorderCart('none')
+          }}
           onDrop={() => addCartwithDrag()}
         >
           <Card.Header style={{ backgroundColor: "#fdc10d", fontWeight: 700 }}>
