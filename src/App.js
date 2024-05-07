@@ -14,18 +14,19 @@ import { products } from "./store/data";
 function App() {
   const [cart, setCart] = useState([]);
   const [item, setItem] = useState();
-  const [costs, setCosts] = useState(0);
+  const sum = useRef(0);
+  const styleAlertAdd = useRef({
+    fontSize: "14px",
+    fontWeight: 600,
+    margin: 0,
+    display: "none",
+  });
 
   let styleDragCart = {
     width: "18rem",
   };
 
   // Сумма всех товаров
-  let sum = 0;
-  let price = cart.map((el) => {
-    sum += Number(el.price);
-  });
-
   const dragItem = (e) => {
     setItem({
       id: e.target.dataset.id,
@@ -39,16 +40,36 @@ function App() {
   };
 
   // Добавление товара и запрет повторений
-  const addCart = (e) => {
+  const addCartwithDrag = (e) => {
     const existItem = cart.find((el) => el.id === item.id);
     if (existItem !== undefined) {
       console.log("Существует");
     } else {
       setCart([...cart, item]);
+      sum.current = sum.current + Number(item.price);
     }
   };
 
-  
+  const addCart = (e) => {
+    const existItem = cart.find((el) => el.id === e.target.dataset.id);
+    if (existItem !== undefined) {
+      console.log("Существует");
+    } else {
+      setCart([...cart, {
+        id: e.target.dataset.id,
+        title: e.target.dataset.title,
+        price: e.target.dataset.price
+      }])
+      sum.current = sum.current + Number(e.target.dataset.price);
+    }
+  };
+
+  const styleAlertDelete = {
+    fontSize: "14px",
+    fontWeight: 600,
+    margin: 0,
+    display: "none",
+  };
 
   // Удаление товара
   const deleteItem = (id) => {
@@ -57,6 +78,7 @@ function App() {
     });
     const resItems = cart.filter((item) => item.id !== x.id);
     setCart(resItems);
+    sum.current = Number(sum.current) - x.price;
   };
 
   return (
@@ -76,7 +98,12 @@ function App() {
                   data-id={el.id}
                   data-title={el.title}
                   data-price={el.price}
-                  style={{ width: "290px", margin: "8px", padding: "0px" }}
+                  style={{
+                    width: "290px",
+                    margin: "8px",
+                    padding: "0px",
+                    border: "2px solid red",
+                  }}
                   draggable={true}
                   onDragStart={(e) => dragItem(e)}
                   onDragEnd={() => dragItemEnd()}
@@ -88,7 +115,16 @@ function App() {
                     <Card.Title style={{ fontWeight: 700, fontSize: "18px" }}>
                       {el.price} Тенге{" "}
                     </Card.Title>
-                    <Button variant="primary">Добавить в корзину</Button>
+                    <Button
+                      key={el.id}
+                      data-id={el.id}
+                      data-title={el.title}
+                      data-price={el.price}
+                      variant="primary"
+                      onClick={(e) => addCart(e)}
+                    >
+                      Добавить в корзину
+                    </Button>
                   </Card.Body>
                 </Card>
               );
@@ -108,24 +144,10 @@ function App() {
           left: "100vw",
         }}
       >
-        <Alert
-          style={{
-            fontSize: "14px",
-            fontWeight: 600,
-            margin: 0,
-          }}
-          variant="success"
-        >
+        <Alert style={styleAlertAdd.current} variant="success">
           Товар успешно добавлен в корзину!
         </Alert>
-        <Alert
-          style={{
-            fontSize: "14px",
-            fontWeight: 600,
-            margin: 0,
-          }}
-          variant="danger"
-        >
+        <Alert style={styleAlertDelete} variant="danger">
           Данный товар присутствует!
         </Alert>
         <Card
@@ -136,7 +158,7 @@ function App() {
             };
           }}
           style={styleDragCart}
-          onDrop={() => addCart()}
+          onDrop={() => addCartwithDrag()}
         >
           <Card.Header style={{ backgroundColor: "#fdc10d", fontWeight: 700 }}>
             Корзина
@@ -177,7 +199,7 @@ function App() {
                 width: "100%",
               }}
             >
-              {"Сумма: "} {sum}
+              {"Сумма: "} {sum.current} {" тг."}
               <Button variant="primary">Перейти к оплате</Button>{" "}
             </ListGroup.Item>
           </ListGroup>
